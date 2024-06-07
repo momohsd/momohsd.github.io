@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录和注册表单</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap');
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .form-header h2 {
+            margin: 0;
+        }
+
+        .form-header button {
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .form-header button:hover {
+            background-color: #0056b3;
+        }
+
+        .form {
+            display: none;
+            transition: opacity 0.5s ease;
+        }
+
+        .form.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .form label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form input[type="text"],
+        .form input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            transition: box-shadow 0.3s ease, background-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form input[type="text"]:hover,
+        .form input[type="password"]:hover {
+            box-shadow: 0 0 10px #b3e5fc;
+            background-color: #b3e5fc;
+        }
+
+        .invite-code-container,
+        .validation-code-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            overflow: hidden;
+            height: 0;
+            transition: height 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+
+        .invite-code-container.active,
+        .validation-code-container.active {
+            height: 50px;
+        }
+
+        .invite-code-container input,
+        .validation-code-container input {
+            width: 30px;
+            height: 40px;
+            text-align: center;
+            font-size: 18px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-right: 5px;
+            transition: box-shadow 0.3s ease, background-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .invite-code-container input:last-child,
+        .validation-code-container input:last-child {
+            margin-right: 0;
+        }
+
+        .form button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form button:hover {
+            background-color: #0056b3;
+        }
+
+        .invite-code-valid,
+        .validation-code-valid {
+            color: rgba(0, 128, 0, 0.5); /* 绿色 */
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        .invite-code-invalid,
+        .validation-code-invalid {
+            color: rgba(255, 0, 0, 0.5); /* 红色 */
+            text-align: right;
+            margin-top: 10px;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake {
+            animation: shake 0.3s;
+        }
+
+        .disabled {
+            background-color: #e0e0e0;
+            pointer-events: none;
+        }
+
+        #terms-confirmation {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        #terms-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 80%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        #terms-close-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        #terms-close-button:hover {
+            background-color: #0056b3;
+        }
+
+        #confirm-button {
+            padding: 10px 20px;
+            background-color: #e0e0e0;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            cursor: not-allowed;
+            margin-top: 20px;
+        }
+
+        #confirm-button.enabled {
+            background-color: #007bff;
+            cursor: pointer;
+        }
+
+        #timer {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-header">
+            <h2 id="form-title">登录</h2>
+            <button id="toggle-button">切换到注册</button>
+        </div>
+        <form class="form active" id="login-form">
+            <label for="login-username">用户名:</label>
+            <input type="text" id="login-username" name="username" required pattern="[\u4e00-\u9fa5a-zA-Z]{6,12}">
+            <label for="login-password">密码:</label>
+            <input type="password" id="login-password" name="password" required pattern="[a-zA-Z0-9]{6,12}">
+            <button type="submit">登录</button>
+        </form>
+        <form class="form" id="register-form">
+            <label for="register-username">用户名:</label>
+            <input type="text" id="register-username" name="username" required pattern="[\u4e00-\u9fa5a-zA-Z]{6,12}">
+            <label for="register-password">密码:</label>
+            <input type="password" id="register-password" name="password" required pattern="[a-zA-Z0-9]{6,12}">
+            <label for="invite-code">邀请码:</label>
+            <div class="invite-code-container" id="invite-code-container">
+                <input type="text" maxlength="1" class="invite-code" data-index="0" pattern="[0-9]">
+                <input type="text" maxlength="1" class="invite-code" data-index="1" pattern="[0-9]">
+                <input type="text" maxlength="1" class="invite-code" data-index="2" pattern="[0-9]">
+                <input type="text" maxlength="1" class="invite-code" data-index="3" pattern="[0-9]">
+                <input type="text" maxlength="1" class="invite-code" data-index="4" pattern="[0-9]">
+                <input type="text" maxlength="1" class="invite-code" data-index="5" pattern="[0-9]">
+                <input type="text" maxlength="1" class="invite-code" data-index="6" pattern="[0-9]">
+                <input type="text" maxlength="1" class="invite-code" data-index="7" pattern="[0-9]">
+            </div>
+            <span id="invite-code-message" class="invite-code-message"></span>
+            <label for="validation-code">校验码:</label>
+            <div class="validation-code-container" id="validation-code-container">
+                <input type="text" maxlength="1" class="validation-code" data-index="0" pattern="[0-9]">
+                <input type="text" maxlength="1" class="validation-code" data-index="1" pattern="[0-9]">
+                <input type="text" maxlength="1" class="validation-code" data-index="2" pattern="[0-9]">
+                <input type="text" maxlength="1" class="validation-code" data-index="3" pattern="[0-9]">
+                <input type="text" maxlength="1" class="validation-code" data-index="4" pattern="[0-9]">
+                <input type="text" maxlength="1" class="validation-code" data-index="5" pattern="[0-9]">
+                <input type="text" maxlength="1" class="validation-code" data-index="6" pattern="[0-9]">
+                <input type="text" maxlength="1" class="validation-code" data-index="7" pattern="[0-9]">
+            </div>
+            <span id="validation-code-message" class="validation-code-message"></span>
+            <div>
+                <input type="checkbox" id="terms-checkbox">
+                <label for="terms-checkbox"><a href="javascript:void(0)" id="terms-link">我已阅读并知晓用户条款</a></label>
+            </div>
+            <div id="invite-code-message"></div>
+            <div id="validation-code-message"></div>
+            <button type="submit" id="register-button" class="disabled">注册</button>
+        </form>
+    </div>
+
+    <div id="terms-confirmation" class="terms-confirmation">
+        <div id="terms-container">
+            <h2>用户条款</h2>
+            <p>这里是用户条款的内容...</p>
+            <button id="confirm-button" disabled>确认 (<span id="timer">10</span> 秒)</button>
+            <button id="terms-close-button">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const toggleButton = document.getElementById('toggle-button');
+            const formTitle = document.getElementById('form-title');
+            const inviteCodeContainer = document.getElementById('invite-code-container');
+            const validationCodeContainer = document.getElementById('validation-code-container');
+            const inviteCodeInputs = document.querySelectorAll('.invite-code');
+            const validationCodeInputs = document.querySelectorAll('.validation-code');
+            const inviteCodeMessage = document.getElementById('invite-code-message');
+            const validationCodeMessage = document.getElementById('validation-code-message');
+            const correctInviteCode = '12345678';
+            const maxAttempts = 5;
+            let attemptCount = 0;
+
+            const termsLink = document.getElementById('terms-link');
+            const termsConfirmation = document.getElementById('terms-confirmation');
+            const confirmButton = document.getElementById('confirm-button');
+            const timerElement = document.getElementById('timer');
+            const termsCloseButton = document.getElementById('terms-close-button');
+            const termsCheckbox = document.getElementById('terms-checkbox');
+            const registerButton = document.getElementById('register-button');
+
+            termsLink.addEventListener('click', () => {
+                termsConfirmation.style.display = 'flex';
+                let countdown = 10;
+                timerElement.textContent = countdown;
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    timerElement.textContent = countdown;
+                    if (countdown <= 0) {
+                        clearInterval(countdownInterval);
+                        confirmButton.disabled = false;
+                        confirmButton.classList.add('enabled');
+                        confirmButton.textContent = '确认';
+                    }
+                }, 1000);
+            });
+
+            confirmButton.addEventListener('click', () => {
+                if (!confirmButton.disabled) {
+                    termsCheckbox.checked = true;
+                    registerButton.classList.remove('disabled');
+                    registerButton.style.backgroundColor = '#007bff';
+                    termsConfirmation.style.display = 'none';
+                }
+            });
+
+            termsCloseButton.addEventListener('click', () => {
+                termsConfirmation.style.display = 'none';
+            });
+
+            termsCheckbox.addEventListener('change', () => {
+                if (termsCheckbox.checked) {
+                    registerButton.classList.remove('disabled');
+                    registerButton.style.backgroundColor = '#007bff';
+                } else {
+                    registerButton.classList.add('disabled');
+                    registerButton.style.backgroundColor = '#e0e0e0';
+                }
+            });
+
+            const generateValidationCode = (username, password) => {
+                const data = username + password;
+                let hash = 0;
+                for (let i = 0; i < data.length; i++) {
+                    const char = data.charCodeAt(i);
+                    hash = (hash << 5) - hash + char;
+                    hash = hash & hash; // Convert to 32bit integer
+                }
+                let code = Math.abs(hash).toString().slice(0, 8); // 生成8位纯数字哈希
+                return code;
+            };
+
+            const validateCode = (inputCode, correctCode) => {
+                return inputCode === correctCode;
+            };
+
+            document.getElementById('register-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const username = document.getElementById('register-username').value;
+                const password = document.getElementById('register-password').value;
+                const enteredCode = Array.from(inviteCodeInputs).map(input => input.value).join('');
+                const enteredValidationCode = Array.from(validationCodeInputs).map(input => input.value).join('');
+                const correctValidationCode = generateValidationCode(username, password);
+
+                let inviteCodeValid = false;
+                let validationCodeValid = false;
+
+                if (enteredCode === correctInviteCode) {
+                    inviteCodeValid = true;
+                    inviteCodeMessage.textContent = '邀请码正确！';
+                    inviteCodeMessage.className = 'invite-code-valid';
+                    inviteCodeInputs.forEach(input => input.style.backgroundColor = 'rgba(0, 128, 0, 0.5)');
+                } else {
+                    inviteCodeMessage.textContent = '邀请码错误！';
+                    inviteCodeMessage.className = 'invite-code-invalid';
+                    inviteCodeInputs.forEach(input => {
+                        input.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
+                        input.classList.add('shake');
+                        setTimeout(() => {
+                            input.classList.remove('shake');
+                        }, 300);
+                    });
+                }
+
+                if (validateCode(enteredValidationCode, correctValidationCode)) {
+                    validationCodeValid = true;
+                    validationCodeMessage.textContent = '校验码正确！';
+                    validationCodeMessage.className = 'validation-code-valid';
+                    validationCodeInputs.forEach(input => input.style.backgroundColor = 'rgba(0, 128, 0, 0.5)');
+                } else {
+                    validationCodeMessage.textContent = '校验码错误！';
+                    validationCodeMessage.className = 'validation-code-invalid';
+                    validationCodeInputs.forEach(input => {
+                        input.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
+                        input.classList.add('shake');
+                        setTimeout(() => {
+                            input.classList.remove('shake');
+                        }, 300);
+                    });
+                }
+
+                if (!inviteCodeValid || !validationCodeValid) {
+                    attemptCount++;
+                    if (attemptCount >= maxAttempts) {
+                        inviteCodeInputs.forEach(input => input.classList.add('disabled'));
+                        validationCodeInputs.forEach(input => input.classList.add('disabled'));
+                        setTimeout(() => {
+                            inviteCodeInputs.forEach(input => {
+                                input.classList.remove('disabled');
+                                input.style.backgroundColor = '';
+                            });
+                            validationCodeInputs.forEach(input => {
+                                input.classList.remove('disabled');
+                                input.style.backgroundColor = '';
+                            });
+                            attemptCount = 0;
+                        }, 600000);
+                    }
+                }
+            });
+
+            inviteCodeInputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    if (value.length === 1 && index < inviteCodeInputs.length - 1) {
+                        inviteCodeInputs[index + 1].focus();
+                    }
+                    if (value.length === 0 && index > 0) {
+                        inviteCodeInputs[index - 1].focus();
+                    }
+                });
+                input.addEventListener('keyup', (e) => {
+                    if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                        inviteCodeInputs[index - 1].focus();
+                    }
+                });
+            });
+
+            validationCodeInputs.forEach((input, index) => {
+                input.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    if (value.length === 1 && index < validationCodeInputs.length - 1) {
+                        validationCodeInputs[index + 1].focus();
+                    }
+                    if (value.length === 0 && index > 0) {
+                        validationCodeInputs[index - 1].focus();
+                    }
+                });
+                input.addEventListener('keyup', (e) => {
+                    if (e.key === 'Backspace' && e.target.value.length === 0 && index > 0) {
+                        validationCodeInputs[index - 1].focus();
+                    }
+                });
+            });
+
+            toggleButton.addEventListener('click', () => {
+                loginForm.classList.toggle('active');
+                registerForm.classList.toggle('active');
+                inviteCodeContainer.classList.toggle('active');
+                validationCodeContainer.classList.toggle('active');
+                if (loginForm.classList.contains('active')) {
+                    formTitle.textContent = '登录';
+                    toggleButton.textContent = '切换到注册';
+                } else {
+                    formTitle.textContent = '注册';
+                    toggleButton.textContent = '切换到登录';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+
+<!--
+1.将邀请码和校验码的正确与错误提示分别移动到“邀请码”和“校验码”这几个字后面，做到在同一行。
+2.限制账户名为中文或英文（或混合），长度为6-12位，密码为数字或英文，长度为6-16位。
+3.密码框后面要有个眼睛按钮决定密码可不可见
+4.当登陆和注册时密码和用户名不符合规范时在“密码”或用户名后面提示错误原因( 例如用户名只能是中文或英文 字符少于6位或字符过长（例如用户名长于12位 密码长于16位）等等提示语 详细指出用户名或密码不规范的地方） 并且整体框变红抖动（颜色和校验码和邀请码的红色一样），符合规范变为常绿
+5.在输入完用户名和密码之前邀请码和校验码是灰色的不可点击 在输入完用户名
+6.校验码和邀请码的输入框只允许输入数字，不允许输入其他字符。
+7.用户必须手动勾选确认阅读条款的对勾，并且可以取消勾选（注册按钮随着其变蓝或变灰）。
+8.“我已阅读并知晓服务条款”这几个字移动到复选框后面，并将其整体移动到左侧。
+9.只有在阅读完成才可以勾选对勾，未完成不可以勾选，中途退不可以点击确定退出，只有在10秒倒计时结束后才能点击“确定”，中途意外退出阅读条款重新计时（例如看了5秒意外退出，再点击进去10s重新倒计时，现在版本的倒计时有问题）
+10.在用户勾选确认阅读服务条款之前，注册按钮应为灰色，并在点击时显示“请阅读服务条款”的提示。
+11.登录和注册框上边界应对齐以保证用户名密码和切换按钮相对位置不变。
+12.每一行代码都需要添加注释
+-->
+
+
